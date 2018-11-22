@@ -11,6 +11,14 @@ before_install:
     python-networkx python-jinja2 python-matplotlib google-perftools
     libgoogle-perftools-dev numactl dc zlib1g-dev libedit-dev
 
+  # Link the correct clang
+  - ln -s /usr/bin/clang-3.4 /usr/lib/llvm-3.4/bin/clang
+
+  # Get dragonegg
+  - wget http://llvm.org/releases/3.4/dragonegg-3.4.src.tar.gz
+  - tar xvf dragonegg-3.4.src.tar.gz && cd dragonegg-3.4
+  - GCC=gcc-4.6 LLVM_CONFIG=llvm-config-3.4 make && sudo cp dragonegg.so /usr/local/lib/. && cd ..
+
   # Install rdiscount
   - rvm install 2.0.0
   - rvm use 2.0.0
@@ -19,14 +27,10 @@ before_install:
   # Install pulp and upgrade numpy
   - sudo pip install pulp pydotplus numpy --upgrade
 
-  # Get dragonegg
-  - wget http://llvm.org/releases/3.4/dragonegg-3.4.src.tar.gz
-  - tar xvf dragonegg-3.4.src.tar.gz && cd dragonegg-3.4
-  - make && sudo cp dragonegg.so /usr/local/lib/. && cd ..
 
 install:
   - ./autogen.sh
-  - ./configure --with-dragonegg=/usr/local/lib/dragonegg.so
+  - ./configure --with-llvm=/usr/lib/llvm-3.4/bin/ --with-dragonegg=/usr/local/lib/dragonegg.so CC=gcc-4.6 CXX=g++-4.6
   - make
   - sudo make install
   - export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
